@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,12 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 
-const Form = ({ type, post, setPost, submitting, handleSubmit }) => {
+const Form = () => {
+  const [post, setPost] = useState({
+    img_path: [],
+    post_content: "",
+    tags: [],
+  });
   return (
     <AlertDialog>
       <AlertDialogTrigger>
@@ -21,80 +27,56 @@ const Form = ({ type, post, setPost, submitting, handleSubmit }) => {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle className="text-2xl">Add New Post</AlertDialogTitle>
           <AlertDialogDescription>
             <section className="w-full max-w-full flex-start flex-col">
-              <h1 className="head_text text-left">
-                <span className="blue_gradient">{type} Post</span>
-              </h1>
-
               <form
-                onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
                 className="mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism"
               >
-                <label>
-                  <span className="font-satoshi font-semibold text-base text-gray-700">
-                    Add a new Post
-                  </span>
+                <label className="font-satoshi font-semibold text-base text-gray-700 flex items-center">
+                  <span>Write Post</span>
                   <textarea
-                    value={""}
+                    value={post.post_content}
                     onChange={(e) =>
                       setPost({ ...post, post_content: e.target.value })
                     }
                     placeholder="Write your post here"
                     required
-                    className="form_textarea"
+                    className="form_textarea w-full mt-2 p-2 ml-4"
                   />
                 </label>
 
-                <label>
-                  <span className="font-satoshi font-semibold text-base text-gray-700">
-                    Add Tags{" "}
-                  </span>
+                <label className="font-satoshi font-semibold text-base text-gray-700">
+                  <span>Add Tags </span>
                   <input
                     value={""}
                     onChange={(e) => setPost({ ...post, tag: e.target.value })}
                     type="text"
                     placeholder="#trending"
                     required
-                    className="form_input"
+                    className="form_input mt-2 p-2"
                   />
                 </label>
 
-                <label>
-                  <span className="font-satoshi font-semibold text-base text-gray-700">
-                    Add Images{" "}
-                  </span>
+                <label className="font-satoshi font-semibold text-base text-gray-700">
+                  <span>Add Images </span>
                   <input
                     type="file"
                     multiple
                     onChange={(e) =>
                       setPost({ ...post, images: e.target.files })
                     }
-                    className="form_input"
+                    className="form_input mt-2 p-2"
                   />
                 </label>
-
-                <div className="flex-end mx-3 mb-5 gap-4">
-                  <Link href="/" className="text-gray-500 text-sm mr-2">
-                    Cancel
-                  </Link>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white"
-                  >
-                    {submitting ? `${type}ing...` : type}
-                  </button>
-                </div>
               </form>
             </section>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogCancel>Discard</AlertDialogCancel>
+          <AlertDialogAction>Upload</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
