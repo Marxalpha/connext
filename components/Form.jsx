@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,36 @@ const Form = () => {
     img_path: [],
     post_content: "",
     tags: [],
+    images: [],
   });
+  const [imgName, setImageName] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setPost({
+      post_content: "",
+      tag: "",
+      img_path: "",
+      images: [],
+    });
+    console.log("called");
+    setImageName([]);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose]);
   return (
     <AlertDialog>
       <AlertDialogTrigger>
@@ -34,8 +63,8 @@ const Form = () => {
                 // onSubmit={handleSubmit}
                 className="mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism"
               >
-                <label className="font-satoshi font-semibold text-base text-gray-700 flex items-center">
-                  <span>Write Post</span>
+                <label className="text-base text-gray-700">
+                  <span>Write Your Post</span>
                   <textarea
                     value={post.post_content}
                     onChange={(e) =>
@@ -43,39 +72,66 @@ const Form = () => {
                     }
                     placeholder="Write your post here"
                     required
-                    className="form_textarea w-full mt-2 p-2 ml-4"
+                    className="w-full p-2 mt-2 border 1px rounded-lg resize-none"
                   />
                 </label>
-
-                <label className="font-satoshi font-semibold text-base text-gray-700">
+                <label className="text-base text-gray-700">
                   <span>Add Tags </span>
                   <input
-                    value={""}
-                    onChange={(e) => setPost({ ...post, tag: e.target.value })}
+                    onChange={(e) => {
+                      setPost({
+                        ...post,
+                        tags: e.target.value.split(/[\s#]+/).filter(Boolean),
+                      });
+                      console.log(post.tags);
+                    }}
                     type="text"
                     placeholder="#trending"
-                    required
-                    className="form_input mt-2 p-2"
+                    className="w-full mt-2 p-2 border 1px rounded-lg"
                   />
                 </label>
-
-                <label className="font-satoshi font-semibold text-base text-gray-700">
-                  <span>Add Images </span>
+                <label className="mt-2 p-2 border 1px rounded-lg cursor-pointer bg-gray-500 text-white hover:bg-gray-400">
+                  Add Images
                   <input
                     type="file"
+                    accept="image/*"
                     multiple
-                    onChange={(e) =>
-                      setPost({ ...post, images: e.target.files })
-                    }
-                    className="form_input mt-2 p-2"
+                    onChange={(e) => {
+                      const newFiles = Array.from(e.target.files);
+                      const newFileNames = newFiles.map((file) => file.name);
+                      setPost((prevPost) => ({
+                        ...prevPost,
+                        images: [...(prevPost.images || []), ...newFiles],
+                      }));
+                      setImageName((prevNames) => [
+                        ...prevNames,
+                        ...newFileNames,
+                      ]);
+                    }}
+                    className="hidden"
                   />
+                  {/* <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      setPost({ ...post, images: e.target.files });
+                      setImageName(
+                        Array.from(e.target.files).map((file) => file.name)
+                      );
+                    }}
+                    className="hidden"
+                  /> */}
                 </label>
+                {imgName.map((name, index) => (
+                  <h3 key={index}>{name}</h3>
+                ))}
               </form>
             </section>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Discard</AlertDialogCancel>
+          <AlertDialogCancel onClick={handleClose}>Discard</AlertDialogCancel>
           <AlertDialogAction>Upload</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
