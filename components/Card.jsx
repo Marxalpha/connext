@@ -1,8 +1,6 @@
 "use client";
 import React from "react";
-import { useState, useEffect } from "react";
-import { storage } from "../firebase-config";
-import { ref, getDownloadURL } from "firebase/storage";
+import { useFetchUrls } from "@/hooks/useFetchUrls";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
 
 const Card = ({
@@ -14,38 +12,11 @@ const Card = ({
   tags,
   Loading,
 }) => {
-  const [loading, setLoading] = useState(true);
-  const [imgUrls, setImgUrls] = useState([]);
-
-  useEffect(() => {
-    async function fetchUrls() {
-      const urls = await getImgUrls(image);
-      setImgUrls(urls);
-      setLoading(false);
-    }
-
-    fetchUrls();
-  }, []);
+  const { loading, imgUrls } = useFetchUrls(image);
 
   const handleTagClick = (tag) => {
     window.location.href = `http://localhost:3000//${tag}`;
   };
-
-  async function getImgUrls(img) {
-    try {
-      const urls = await Promise.all(
-        img.map(async (imageName) => {
-          const storageRef = ref(storage, imageName);
-          const url = await getDownloadURL(storageRef);
-          return url;
-        })
-      );
-      return urls;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
   console.log("image urls: ", imgUrls);
   return (
     <div>
