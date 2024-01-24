@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +14,8 @@ import {
 } from "./ui/alert-dialog";
 
 const Form = () => {
+  const { data: session, status } = useSession();
+
   const [post, setPost] = useState({
     img_path: [],
     post_content: "",
@@ -21,6 +24,17 @@ const Form = () => {
   });
   const [imgName, setImageName] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleSubmit = () => {
+    const accountName = session?.user?.name;
+    const profilePic = session?.user?.image;
+    post.avatar = profilePic;
+    post.username = accountName;
+    post.date_time = new Date().toLocaleString();
+    post.img_path = post.images.map((image) => image.name);
+    console.log("The post going to be uploaded is:", post);
+    handleClose();
+  };
 
   const handleClose = () => {
     setIsOpen(false);
@@ -47,6 +61,7 @@ const Form = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleClose]);
+
   return (
     <AlertDialog>
       <AlertDialogTrigger>
@@ -60,7 +75,7 @@ const Form = () => {
           <AlertDialogDescription>
             <section className="w-full max-w-full flex-start flex-col">
               <form
-                // onSubmit={handleSubmit}
+                onSubmit={handleSubmit}
                 className="mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism"
               >
                 <label className="text-base text-gray-700">
@@ -90,7 +105,7 @@ const Form = () => {
                     className="w-full mt-2 p-2 border 1px rounded-lg"
                   />
                 </label>
-                <label className="mt-2 p-2 border 1px rounded-lg cursor-pointer bg-gray-500 text-white hover:bg-gray-400">
+                <label className="mt-2 p-2 border-2 border-gray-400 rounded-lg bg-blue-600 cursor-pointer text-white hover:bg-white hover:text-gray-500 w-1/4">
                   Add Images
                   <input
                     type="file"
@@ -110,18 +125,6 @@ const Form = () => {
                     }}
                     className="hidden"
                   />
-                  {/* <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => {
-                      setPost({ ...post, images: e.target.files });
-                      setImageName(
-                        Array.from(e.target.files).map((file) => file.name)
-                      );
-                    }}
-                    className="hidden"
-                  /> */}
                 </label>
                 {imgName.map((name, index) => (
                   <h3 key={index}>{name}</h3>
@@ -132,7 +135,7 @@ const Form = () => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleClose}>Discard</AlertDialogCancel>
-          <AlertDialogAction>Upload</AlertDialogAction>
+          <AlertDialogAction onClick={handleSubmit}>Upload</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

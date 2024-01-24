@@ -1,18 +1,27 @@
 import { collection, getDocs, addDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase-config";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 async function addData(data) {
   try {
     const docRef = await addDoc(collection(db, "posts"), {
       ...data,
     });
+
+    const storage = getStorage();
+    const promises = data.images.map((image, index) => {
+      const storageRef = ref(storage, `posts/${docRef.id}/${index}`);
+      return uploadBytes(storageRef, image);
+    });
+
+    await Promise.all(promises);
+
     return true;
   } catch (e) {
     console.log(e);
     return false;
   }
 }
-
 export async function getData() {
   try {
     let dataArr = [];
@@ -43,13 +52,22 @@ export async function getData() {
 }
 
 export async function POST(req) {
-  const { username, post_id, img_path, post_content, date_time } = req.json();
+  const {
+    username,
+    post_id,
+    img_path,
+    post_content,
+    date_time,
+    avatar,
+  } = req.json();
+
   let data = {
     username,
     post_id,
     img_path,
     post_content,
     date_time,
+    avatar,
   };
 
   const result = await addData(data);
