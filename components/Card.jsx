@@ -2,6 +2,7 @@
 import React from "react";
 import { useFetchUrls } from "@/hooks/useFetchUrls";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
+import { Image } from "next/image";
 
 const Card = ({
   username,
@@ -11,13 +12,13 @@ const Card = ({
   date,
   tags,
   Loading,
+  fold_id,
 }) => {
-  const { loading, imgUrls } = useFetchUrls(image);
+  const { loading, imgUrls } = useFetchUrls(image, fold_id);
 
   const handleTagClick = (tag) => {
     window.location.href = `http://localhost:3000//${tag}`;
   };
-  console.log("image urls: ", imgUrls);
   return (
     <div>
       {loading || Loading ? (
@@ -46,10 +47,10 @@ const Card = ({
             <div>
               <Carousel>
                 <CarouselContent>
-                  {imgUrls.map((imageUrl) => (
-                    <CarouselItem>
+                  {imgUrls.map((imageUrl, index) => (
+                    <CarouselItem key={index}>
                       <div>
-                        <img src={imageUrl} alt="img1" />
+                        <Image src={imageUrl} alt="img1" />
                       </div>
                     </CarouselItem>
                   ))}

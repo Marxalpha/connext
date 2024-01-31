@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { POST } from "@/app/api/post/route";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   AlertDialog,
@@ -25,18 +26,23 @@ const Form = () => {
   const [imgName, setImageName] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     const accountName = session?.user?.name;
     const profilePic = session?.user?.image;
     post.avatar = profilePic;
     post.username = accountName;
-    post.date_time = new Date().toLocaleString();
     post.img_path = post.images.map((image) => image.name);
-    console.log("The post going to be uploaded is:", post);
+    const response = await POST(post);
+    if (response) {
+      console.log("Data uploaded");
+    } else {
+      console.log("data upload fail");
+    }
     handleClose();
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsOpen(false);
     setPost({
       post_content: "",
@@ -46,7 +52,7 @@ const Form = () => {
     });
     console.log("called");
     setImageName([]);
-  };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {

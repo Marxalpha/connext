@@ -1,27 +1,30 @@
-import { collection, getDocs, addDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase-config";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { serverTimestamp } from "firebase/firestore";
 
-async function addData(data) {
-  try {
-    const docRef = await addDoc(collection(db, "posts"), {
-      ...data,
-    });
+// async function addData(data, imgs) {
+//   try {
+//     console.log("data: ", data);
+//     data.date_time = serverTimestamp();
+//     const docRef = await addDoc(collection(db, "posts"), {
+//       ...data,
+//     });
+//     const storage = getStorage();
+//     const promises = imgs.map((image, index) => {
+//       const storageRef = ref(storage, `posts/${docRef.id}/${index}`);
+//       return uploadBytes(storageRef, image);
+//     });
 
-    const storage = getStorage();
-    const promises = data.images.map((image, index) => {
-      const storageRef = ref(storage, `posts/${docRef.id}/${index}`);
-      return uploadBytes(storageRef, image);
-    });
+//     await Promise.all(promises);
 
-    await Promise.all(promises);
+//     return true;
+//   } catch (e) {
+//     console.log(e);
+//     return false;
+//   }
+// }
 
-    return true;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-}
 export async function getData() {
   try {
     let dataArr = [];
@@ -43,6 +46,7 @@ export async function getData() {
         .replace(/,/g, " ");
       dataArr.push(d);
     });
+    console.log("Hello inside get data function: ", dataArr);
     return dataArr;
   } catch (e) {
     console.log(e);
@@ -52,15 +56,14 @@ export async function getData() {
 }
 
 export async function POST(req) {
-  const {
-    username,
-    post_id,
-    img_path,
-    post_content,
-    date_time,
-    avatar,
-  } = req.json();
-
+  console.log("Req :", req);
+  let username = req.username;
+  let post_id = 1;
+  let img_path = req.img_path;
+  let post_content = req.post_content;
+  let date_time = req.date_time;
+  let avatar = req.avatar;
+  let images = req.images;
   let data = {
     username,
     post_id,
@@ -69,12 +72,30 @@ export async function POST(req) {
     date_time,
     avatar,
   };
+  try {
+    console.log("data: ", data);
+    data.date_time = serverTimestamp();
+    const docRef = await addDoc(collection(db, "posts"), {});
+    const id = docRef.id;
+    const new_data = { ...data, id };
+    await setDoc(doc(db, "posts", id), new_data);
+    console.log("newdata", new_data);
+    const storage = getStorage();
+    const promises = images.map((image, index) => {
+      const storageRef = ref(storage, `posts/${docRef.id}/${image.name}`);
+      return uploadBytes(storageRef, image);
+    });
 
-  const result = await addData(data);
-  return {
-    status: 200,
-    body: {
-      result,
-    },
-  };
+    await Promise.all(promises);
+
+    return {
+      status: 200,
+      body: {
+        result,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
 }

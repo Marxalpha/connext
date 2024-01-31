@@ -19,6 +19,7 @@ export default function Home() {
     }
     fetchdata();
   }, []);
+  console.log("Posts: ", posts);
   // const [posts,postsLoading,postsError] = useCollection(
   //   fs.collection('posts'),
   //   {}
@@ -54,6 +55,7 @@ export default function Home() {
             avatar={post.avatar}
             loading={loading}
             date={post.date_time}
+            fold_id={post.doc_id}
           ></Card>
         ))}
       </div>
